@@ -14,12 +14,14 @@ import warnings
 
 
 def get_current_str_time() -> str:
+    """get local time"""
     now_time = datetime.datetime.now()
     str_time = now_time.strftime('%Y年%m月%d日星期%w %H时%M分%S秒')
     return str_time
 
 
 def download_file(url, save_path):
+    """download a file by its url"""
     import requests
 
     r = requests.get(url, stream=True)
@@ -29,6 +31,8 @@ def download_file(url, save_path):
 
 
 def time_it(method):
+    """use this decorator to print a function time cost"""
+
     @functools.wraps(method)
     def waapper(*args, **kwargs):
         start = time.time()
@@ -42,6 +46,7 @@ def time_it(method):
 
 
 def quick_sort(arr: list) -> list:
+    """classic sort algorithm"""
     if len(arr) < 2:
         return arr
     temp = arr[0]
@@ -51,6 +56,7 @@ def quick_sort(arr: list) -> list:
 
 
 def get_basic_logger():
+    """fast way to create a logging.Logger object"""
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
@@ -62,12 +68,12 @@ def get_basic_logger():
 
 
 def chunks(arr: list, n: int) -> list:
-    """将列表n等分"""
+    """split list to n part"""
     return [arr[i:i + n] for i in range(0, len(arr), n)]
 
 
 def get_host_ip():
-    """查询本机ip地址"""
+    """check local ip"""
     import socket
 
     s = None
@@ -82,12 +88,12 @@ def get_host_ip():
 
 
 def time_to_timestamp(date):
-    """时间转化为时间戳"""
+    """2000-10-20 12:10:30 format time to timestamp"""
     return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").timestamp()
 
 
 def second_to_strtime(second: int):
-    """秒转化为分秒"""
+    """second to min:sec"""
     return time.strftime("%M:%S", time.gmtime(second))
 
 
@@ -113,6 +119,19 @@ def indented_json_string(json_string):
 
 
 class MagicDict(dict):
+    """
+    let you access python dict object by using attr
+    Example:
+        from funfunc import MagicDict
+
+        simple_dict = {'name': 'Jack', 'age': 19, 'info': {'address': 'Beijing', 'phone': '123'}}
+        magic_dict = MagicDict(simple_dict)
+        print(magic_dict.name)
+        # Jack
+        print(magic_dict.info.address)
+        # Beijing
+    """
+
     # inherit from built-in class dict to automatically implement all dict original method
     def __init__(self, d=None, **kwargs):  # noqa
         if d is None:

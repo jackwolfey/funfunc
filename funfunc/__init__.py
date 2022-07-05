@@ -38,7 +38,7 @@ from .tool import (
     MagicDict
 )
 
-__VERSION__ = "0.1.2"
+__VERSION__ = "0.1.3"
 __AUTHOR__ = "Wei Jia"
 __DESCRIPTION__ = "Make Py Development Much Easier & Fun"
 
