@@ -1,0 +1,5 @@
+build
+dist
+funfunc.egg-info
+.idea
+__pycache__
