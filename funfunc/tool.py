@@ -169,3 +169,44 @@ class MagicDict(dict):
     def pop(self, k, d=None):
         delattr(self, k)
         return super(MagicDict, self).pop(k, d)
+
+
+class OptClass:
+    """
+    let you create a Option class by a list of option names of predefined options dict
+    .json class property can convert options to json format string
+    Example:
+        # init by list of option names
+        opt_names = ['use_gpu', 'workers', 'batch_size']
+        opts = OptClass(opt_names)
+        opts.use_gpu = True
+        opts.workers = 2
+
+        # init by predefined options dict
+        opts_dict = {'use_gpu': True, 'workers': 2, 'batch_size': 16}
+        opts = OptClass(opts_dict)
+        print(opts.use_gpu)
+        print(opts.json)
+    """
+
+    def __init__(self, option_names):
+        if isinstance(option_names, list):
+            for opt in option_names:
+                if not isinstance(opt, str):
+                    opt_str = str(opt)
+                    setattr(self, opt_str, None)
+                else:
+                    setattr(self, opt, None)
+        elif isinstance(option_names, dict):
+            for k, v in option_names.items():
+                if not isinstance(k, str):
+                    opt_str = str(k)
+                    setattr(self, opt_str, v)
+                else:
+                    setattr(self, k, v)
+        else:
+            raise TypeError('Unsupported option_names type, please pass a list or dict object')
+
+    @property
+    def json(self):
+        return json.dumps(self.__dict__)

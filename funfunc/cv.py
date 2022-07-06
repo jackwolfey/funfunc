@@ -71,3 +71,24 @@ def base64_string_to_cv_image(base64_string: str):
     base64_decode = base64.b64decode(base64_string)
     cv_image = cv2.imdecode(np.frombuffer(base64_decode, np.uint8), cv2.COLOR_BGR2RGB)
     return cv_image
+
+
+def rotate_image(img, degree):
+    """
+    rotate a cv image and return its rotation matrix
+    @param img: cv image object
+    @param degree: rotate degree, if its negative, do counterclockwise rotation
+    """
+    import cv2
+    from math import fabs, sin, radians
+
+    height, width = img.shape[:2]
+    new_height = int(width * fabs(sin(radians(degree))) + height * fabs(cos(radians(degree))))
+    new_width = int(height * fabs(sin(radians(degree))) + width * fabs(cos(radians(degree))))
+    rotation_matrix = cv2.getRotationMatrix2D((width // 2, height // 2), degree, 1)
+
+    rotation_matrix[0, 2] += (new_width - width) // 2
+    rotation_matrix[1, 2] += (new_height - height) // 2
+
+    rotated_img = cv2.warpAffine(img, rotation_matrix, (new_width, new_height), borderValue=(255, 255, 255))
+    return rotated_img, rotation_matrix
