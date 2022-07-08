@@ -189,24 +189,39 @@ class OptClass:
         print(opts.json)
     """
 
+    @functools.singledispatchmethod
     def __init__(self, option_names):
-        if isinstance(option_names, list):
-            for opt in option_names:
-                if not isinstance(opt, str):
-                    opt_str = str(opt)
-                    setattr(self, opt_str, None)
-                else:
-                    setattr(self, opt, None)
-        elif isinstance(option_names, dict):
-            for k, v in option_names.items():
-                if not isinstance(k, str):
-                    opt_str = str(k)
-                    setattr(self, opt_str, v)
-                else:
-                    setattr(self, k, v)
-        else:
-            raise TypeError('Unsupported option_names type, please pass a list or dict object')
+        raise TypeError(f'Unsupported option_names type: {type(option_names)}, please pass a list or dict object')
+
+    @__init__.register(list)
+    def _(self, option_names):
+        for opt in option_names:
+            if not isinstance(opt, str):
+                opt_str = str(opt)
+                setattr(self, opt_str, None)
+            else:
+                setattr(self, opt, None)
+
+    @__init__.register(dict)
+    def _(self, option_names):
+        for k, v in option_names.items():
+            if not isinstance(k, str):
+                opt_str = str(k)
+                setattr(self, opt_str, v)
+            else:
+                setattr(self, k, v)
 
     @property
     def json(self):
         return json.dumps(self.__dict__)
+
+
+def get_all_abspath_from_folder(folder_path: str, file_only: bool = True) -> list:
+    """
+    get all files of a path or a folder, if file_only=False, include folder
+    """
+    if not file_only:
+        return [os.path.join(folder_path, i) for i in os.listdir(folder_path)]
+
+    return [os.path.join(folder_path, i) for i in os.listdir(folder_path) if
+            os.path.isfile(os.path.join(folder_path, i))]

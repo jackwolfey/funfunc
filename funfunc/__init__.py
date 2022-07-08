@@ -4,7 +4,7 @@
 # FILE    : __init__
 # PROJECT : funfunc
 # IDE     : PyCharm
-__VERSION__ = "0.1.5"
+__VERSION__ = "0.1.6"
 __AUTHOR__ = "Wei Jia"
 __DESCRIPTION__ = "Make Py Development Much Easier & Fun"
 __all__ = [
@@ -31,7 +31,9 @@ __all__ = [
     'train_test_split_arr',
     'MagicDict',
     'OptClass',
-    'rotate_image'
+    'rotate_image',
+    'get_all_abspath_from_folder',
+    'replace_chinese'
 ]
 
 from .cv import *
