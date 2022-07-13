@@ -11,9 +11,9 @@ import io
 def pil_image_to_base64_string(pil_image, image_format='.jpg') -> str:
     """
     conver PIL.Image object into base64string
-    @param pil_image: PIL.Image object
-    @param image_format: converted image format,default = '.jpg', it could also be '.png','.jpeg','.bmp'
-    @return: base64string
+    @param pil_image:PIL.Image object
+    @param image_format:converted image format,default = '.jpg', it could also be '.png','.jpeg','.bmp'
+    @return:base64string
     """
     temp_buffer = io.BytesIO()
     try:
@@ -73,7 +73,7 @@ def base64_string_to_cv_image(base64_string: str):
     return cv_image
 
 
-def rotate_image(img, degree):
+def rotate_image(img, degree: int):
     """
     rotate a cv image and return its rotation matrix
     @param img: cv image object

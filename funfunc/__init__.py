@@ -4,7 +4,7 @@
 # FILE    : __init__
 # PROJECT : funfunc
 # IDE     : PyCharm
-__VERSION__ = "0.1.6"
+__VERSION__ = "0.1.7"
 __AUTHOR__ = "Wei Jia"
 __DESCRIPTION__ = "Make Py Development Much Easier & Fun"
 __all__ = [
