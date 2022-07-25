@@ -9,7 +9,7 @@ setup(name="funfunc",
       url="https://github.com/jackwolfey/funfunc",
       author="Wei Jia",
       author_email="437160499@163.com",
-      packages=find_packages(),
+      packages=find_packages(exclude='test'),
       platforms=["all"],
       classifiers=[
           'Topic :: Software Development :: Libraries :: Python Modules',

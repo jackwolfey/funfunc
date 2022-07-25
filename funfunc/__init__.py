@@ -4,16 +4,16 @@
 # FILE    : __init__
 # PROJECT : funfunc
 # IDE     : PyCharm
-__VERSION__ = "0.1.7"
+__VERSION__ = "0.1.8"
 __AUTHOR__ = "Wei Jia"
 __DESCRIPTION__ = "Make Py Development Much Easier & Fun"
 __all__ = [
     'base64_string_to_pil_image',
     'pil_image_to_base64_string',
-    'cv_image_to_pil_image',
-    'pil_image_to_cv_image',
-    'base64_string_to_cv_image',
-    'cv_image_to_base64_string',
+    'image_array_to_pil_image',
+    'pil_image_to_image_array',
+    'base64_string_to_image_array',
+    'image_array_to_base64_string',
     'get_device_torch',
     'pandas_max_print',
     'Validator',

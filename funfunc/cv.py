@@ -8,18 +8,17 @@ import base64
 import io
 
 
-def pil_image_to_base64_string(pil_image, image_format='.jpg') -> str:
+def pil_image_to_base64_string(pil_image) -> str:
     """
     conver PIL.Image object into base64string
     @param pil_image:PIL.Image object
-    @param image_format:converted image format,default = '.jpg', it could also be '.png','.jpeg','.bmp'
     @return:base64string
     """
     temp_buffer = io.BytesIO()
     try:
-        pil_image.save(temp_buffer, format=image_format)
+        pil_image.save(temp_buffer, format('png'))
     except Exception as e:
-        raise NotImplementedError(f'pil_image has not method save(), is this a PIL.Image? {e}')
+        raise NotImplementedError(f'pil_image has not method save(), is this a PIL.Image.Image? {e}')
     byte_data = temp_buffer.getvalue()
     base64_string = base64.b64encode(byte_data).decode('utf-8')
     return base64_string
@@ -34,43 +33,43 @@ def base64_string_to_pil_image(image_base64_string: str):
     return pil_image
 
 
-def pil_image_to_cv_image(pil_image):
+def pil_image_to_image_array(pil_image):
     import cv2
     import numpy as np
 
-    cv_image = cv2.cvtColor(np.asarray(pil_image), cv2.COLOR_RGB2BGR)
-    return cv_image
+    image_array = cv2.cvtColor(np.asarray(pil_image), cv2.COLOR_RGB2BGR)
+    return image_array
 
 
-def cv_image_to_pil_image(cv_image):
+def image_array_to_pil_image(image_array):
     import cv2
     from PIL import Image
 
-    pil_image = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
+    pil_image = Image.fromarray(cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB))
     return pil_image
 
 
-def cv_image_to_base64_string(cv_image, image_format='.jpg') -> str:
+def image_array_to_base64_string(image_array, image_format='.png') -> str:
     """
-    conver cv2 image object into base64string
-    @param cv_image: cv2 image object
+    conver numpy array image object into base64string
+    @param image_array: numpy array image object
     @param image_format: converted image format,default = '.jpg', it could also be '.png','.jpeg','.bmp'
     @return: base64string
     """
     import cv2
 
-    temp_string = cv2.imencode(image_format, cv_image)[1].tobytes()
+    temp_string = cv2.imencode(image_format, image_array)[1].tobytes()
     base64_string = base64.b64encode(temp_string).decode('utf-8')
     return base64_string
 
 
-def base64_string_to_cv_image(base64_string: str):
+def base64_string_to_image_array(base64_string: str):
     import cv2
     import numpy as np
 
     base64_decode = base64.b64decode(base64_string)
-    cv_image = cv2.imdecode(np.frombuffer(base64_decode, np.uint8), cv2.COLOR_BGR2RGB)
-    return cv_image
+    image_array = cv2.imdecode(np.frombuffer(base64_decode, np.uint8), cv2.COLOR_BGR2RGB)
+    return image_array
 
 
 def rotate_image(img, degree: int):
@@ -80,7 +79,7 @@ def rotate_image(img, degree: int):
     @param degree: rotate degree, if its negative, do counterclockwise rotation
     """
     import cv2
-    from math import fabs, sin, radians
+    from math import fabs, sin, radians, cos
 
     height, width = img.shape[:2]
     new_height = int(width * fabs(sin(radians(degree))) + height * fabs(cos(radians(degree))))
