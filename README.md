@@ -13,7 +13,7 @@ import funfunc
 import cv2
 
 cv_image = cv2.imread('/img/path.jpg')
-base64_string = funfunc.cv_image_to_base64_string(cv_image)
+base64_string = funfunc.image_array_to_base64_string(cv_image)
 ```
 ### Print a function runing time
 ```
