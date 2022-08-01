@@ -7,7 +7,7 @@ pip install funfunc
 ```
 
 ## Usage
-### Convert your opencv image object to base64 format string
+### Convert your image array object to base64 format string
 ```
 import funfunc
 import cv2
@@ -18,11 +18,11 @@ base64_string = funfunc.image_array_to_base64_string(cv_image)
 ### Print a function runing time
 ```
 import funfunc
+import time
 
 @funfunc.time_it
 def simple_func():
-    for i in range(100000):
-        print(i)
+    time.sleep(3)
 ```
 ### Split a list to train and test set by a specific ratio
 ```
