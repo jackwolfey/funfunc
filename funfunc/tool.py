@@ -55,13 +55,22 @@ def quick_sort(arr: list) -> list:
     return quick_sort(small) + [temp] + quick_sort(big)
 
 
-def get_basic_logger():
+def get_basic_logger(level=logging.INFO, fmt: str = None, datefmt: str = None, **kwargs):
     """fast way to create a logging.Logger object"""
+    if fmt:
+        log_format = fmt
+    else:
+        log_format = "%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s"
+
+    if datefmt:
+        log_datefmt = datefmt
+    else:
+        log_datefmt = "%Y-%m-%d %H:%M:%S"
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+        level=level,
+        format=log_format,
+        datefmt=log_datefmt,
+        **kwargs)
 
     logger = logging.getLogger(__name__)
     return logger
@@ -189,27 +198,23 @@ class OptClass:
         print(opts.json)
     """
 
-    @functools.singledispatchmethod
     def __init__(self, option_names):
-        raise TypeError(f'Unsupported option_names type: {type(option_names)}, please pass a list or dict object')
-
-    @__init__.register(list)
-    def _(self, option_names):
-        for opt in option_names:
-            if not isinstance(opt, str):
-                opt_str = str(opt)
-                setattr(self, opt_str, None)
-            else:
-                setattr(self, opt, None)
-
-    @__init__.register(dict)
-    def _(self, option_names):
-        for k, v in option_names.items():
-            if not isinstance(k, str):
-                opt_str = str(k)
-                setattr(self, opt_str, v)
-            else:
-                setattr(self, k, v)
+        if isinstance(option_names, list):
+            for opt in option_names:
+                if not isinstance(opt, str):
+                    opt_str = str(opt)
+                    setattr(self, opt_str, None)
+                else:
+                    setattr(self, opt, None)
+        elif isinstance(option_names, dict):
+            for k, v in option_names.items():
+                if not isinstance(k, str):
+                    opt_str = str(k)
+                    setattr(self, opt_str, v)
+                else:
+                    setattr(self, k, v)
+        else:
+            raise TypeError(f'Unsupported option_names type: {type(option_names)}, please pass a list or dict object')
 
     @property
     def json(self):

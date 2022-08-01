@@ -1,10 +1,20 @@
+import base64
+import os
 import unittest
+import time
+
 import cv2.cv2 as cv2
 import numpy as np
-import base64
-import funfunc
-from PIL import Image
 import pandas as pd
+from PIL import Image
+
+import funfunc
+
+SKIP_TORCH = False
+try:
+    import torch
+except ImportError:
+    SKIP_TORCH = True
 
 
 class FunfuncTestCase(unittest.TestCase):
@@ -39,6 +49,8 @@ class FunfuncTestCase(unittest.TestCase):
         image_base64 = funfunc.image_array_to_base64_string(self.image_array)
         self.assertEqual(image_base64, self.image_base64)
 
+    @unittest.skipIf(SKIP_TORCH, "package torch is too big, if didn't install, "
+                                 "then pass the get_device_torch test")
     def test_get_device_torch(self):
         device = funfunc.get_device_torch()
         self.assertEqual(device, 'cpu')
@@ -64,6 +76,25 @@ class FunfuncTestCase(unittest.TestCase):
         not_chinese = funfunc.Validator.is_chinese(un_chinese)
         self.assertTrue(is_chinese)
         self.assertFalse(not_chinese)
+
+    def test_download_file(self):
+        os.remove('./pic.gif')
+        funfunc.download_file("http://img61.ddimg.cn/upload_img/00405/luyi/DDlogoNEW.gif",
+                              './pic.gif')
+        self.assertTrue(os.path.exists('./pic.gif'))
+
+    def test_time_it(self):
+        @funfunc.time_it
+        def a_func():
+            time.sleep(3)
+
+        a_func()
+        self.assertEqual(True, True)
+
+    def test_quick_sort(self):
+        arr = [3, 1, 2]
+        sorted_arr = funfunc.quick_sort(arr)
+        self.assertEqual(sorted_arr, sorted(arr))
 
 
 if __name__ == '__main__':
