@@ -4,7 +4,7 @@
 # FILE    : __init__
 # PROJECT : funfunc
 # IDE     : PyCharm
-__VERSION__ = "0.1.9"
+__VERSION__ = "0.2.0"
 __AUTHOR__ = "Wei Jia"
 __DESCRIPTION__ = "Make Py Development Much Easier & Fun"
 __all__ = [
@@ -33,7 +33,12 @@ __all__ = [
     'OptClass',
     'rotate_image',
     'get_all_abspath_from_folder',
-    'replace_chinese'
+    'replace_chinese',
+    'time_it_precise',
+    'is_in_docker',
+    'get_methods',
+    'get_args_info',
+    'try_except_print'
 ]
 
 from .cv import *

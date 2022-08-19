@@ -5,6 +5,7 @@
 # PROJECT : funfunc
 # IDE     : PyCharm
 import random
+from typing import Tuple, List
 
 
 def pandas_max_print() -> None:
@@ -14,18 +15,18 @@ def pandas_max_print() -> None:
     pd.set_option('display.max_rows', None)
 
 
-def train_test_split_arr(arr: list, ratio: float, shuffle=False):
+def train_test_split_arr(arr: list, ratio: float, shuffle=False) -> Tuple[List, List]:
     """
-    @param arr:待拆分的列表
-    @param ratio:希望得到的拆分后的列表数量的比例
-    @param shuffle:是否随机打乱顺序
-    @return:两个列表，第一个是长度比例为ratio的列表，第二个列表是raw列表拆出之后剩下的元素
+    @param arr: target list ready to split
+    @param ratio: the train set ratio
+    @param shuffle: shuffle arr
+    @return: Tuple(train_set, test_set)
     """
     if shuffle:
         random.shuffle(arr)
 
     length = len(arr)
-    test_idx = random.sample(range(length), int(length * ratio))
+    test_idx = random.sample(range(length), length - (int(length * ratio)))
     train = []
     test = []
 

@@ -78,7 +78,8 @@ class FunfuncTestCase(unittest.TestCase):
         self.assertFalse(not_chinese)
 
     def test_download_file(self):
-        os.remove('./pic.gif')
+        if os.path.exists('./pic.gif'):
+            os.remove('./pic.gif')
         funfunc.download_file("http://img61.ddimg.cn/upload_img/00405/luyi/DDlogoNEW.gif",
                               './pic.gif')
         self.assertTrue(os.path.exists('./pic.gif'))
@@ -95,6 +96,28 @@ class FunfuncTestCase(unittest.TestCase):
         arr = [3, 1, 2]
         sorted_arr = funfunc.quick_sort(arr)
         self.assertEqual(sorted_arr, sorted(arr))
+
+    def test_chunks(self):
+        arr = [i for i in range(100)]
+        the_chunks = funfunc.chunks(arr, 10)
+        self.assertEqual(len(the_chunks[0]), 10)
+
+    def test_get_all_abspath_from_folder(self):
+        path = '.'
+        file_lst = funfunc.get_all_abspath_from_folder(path)
+        file_lst_relative = funfunc.get_all_abspath_from_folder(path, get_relative=True)
+        file_lst_with_folder = funfunc.get_all_abspath_from_folder(path, file_only=False)
+        self.assertEqual(len(file_lst), 3)
+        self.assertEqual(sorted(file_lst_relative)[0], './pic.gif')
+        self.assertEqual(len(file_lst_with_folder), 4)
+
+    def test_train_test_split_arr(self):
+        arr = [i for i in range(100)]
+        train, test = funfunc.train_test_split_arr(arr, ratio=0.90, shuffle=True)
+        self.assertEqual(len(train), 90)
+
+    def test_is_in_docker(self):
+        self.assertFalse(funfunc.is_in_docker())
 
 
 if __name__ == '__main__':

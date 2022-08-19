@@ -34,7 +34,7 @@ def time_it(method):
     """use this decorator to print a function time cost"""
 
     @functools.wraps(method)
-    def waapper(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         start = time.time()
         result = method(*args, **kwargs)
         end = time.time()
@@ -42,7 +42,22 @@ def time_it(method):
 
         return result
 
-    return waapper
+    return wrapper
+
+
+def time_it_precise(method):
+    """similar to time_it but use more precise time.perf_counter()"""
+
+    @functools.wraps(method)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = method(*args, **kwargs)
+        end = time.perf_counter()
+        print('{} USED TIME:{}'.format(method.__name__, end - start))
+
+        return result
+
+    return wrapper
 
 
 def quick_sort(arr: list) -> list:
@@ -77,7 +92,7 @@ def get_basic_logger(level=logging.INFO, fmt: str = None, datefmt: str = None, *
 
 
 def chunks(arr: list, n: int) -> list:
-    """split list to n part"""
+    """split list to some lists with n items in it"""
     return [arr[i:i + n] for i in range(0, len(arr), n)]
 
 
@@ -221,12 +236,45 @@ class OptClass:
         return json.dumps(self.__dict__)
 
 
-def get_all_abspath_from_folder(folder_path: str, file_only: bool = True) -> list:
+def get_all_abspath_from_folder(folder_path: str, get_relative: bool = False, file_only: bool = True) -> list:
     """
-    get all files of a path or a folder, if file_only=False, include folder
+    get all files path of a path or a folder, if file_only=False, include folder
+    @param folder_path: target folder_path, a path-like string
+    @param get_relative: if True, will return relative path instead of abspath
+    @param file_only: if False, will return folder's path in folder_path
     """
+    if not get_relative:
+        folder_path = os.path.abspath(folder_path)
+
     if not file_only:
         return [os.path.join(folder_path, i) for i in os.listdir(folder_path)]
 
     return [os.path.join(folder_path, i) for i in os.listdir(folder_path) if
             os.path.isfile(os.path.join(folder_path, i))]
+
+
+def is_in_docker():
+    return os.path.exists('/workspace')
+
+
+def get_methods(instance):
+    methods = [m for m in dir(instance) if callable(getattr(instance, m)) and not m.startswith("__")]
+    return methods
+
+
+def get_args_info(name, opt):
+    return f'{name}: ' + ', '.join(f'{k}={v}' for k, v in vars(opt).items())
+
+
+def try_except_print(func):
+    """
+    auto add try except to a function, use @try_except_print decorator
+    """
+
+    def handler(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception as e:
+            print(f'Exception From {func.__name__}: {e}')
+
+    return handler
