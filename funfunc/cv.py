@@ -11,8 +11,9 @@ import io
 def pil_image_to_base64_string(pil_image) -> str:
     """
     conver PIL.Image object into base64string
-    @param pil_image:PIL.Image object
-    @return:base64string
+
+    :param pil_image: PIL.Image object
+    :return: base64string
     """
     temp_buffer = io.BytesIO()
     try:
@@ -49,16 +50,27 @@ def image_array_to_pil_image(image_array):
     return pil_image
 
 
+def image_array_to_bytes(image_array, image_format='.png'):
+    import cv2
+
+    imencode = cv2.imencode(image_format, image_array)
+    if imencode[0]:
+        encoded_image = imencode[1]
+        return encoded_image.tobytes()
+    else:
+        raise ValueError(f'This image_array couldn\'t encode to \'{image_format}\' format, '
+                         f'please try something else.')
+
+
 def image_array_to_base64_string(image_array, image_format='.png') -> str:
     """
     conver numpy array image object into base64string
-    @param image_array: numpy array image object
-    @param image_format: converted image format,default = '.jpg', it could also be '.png','.jpeg','.bmp'
-    @return: base64string
-    """
-    import cv2
 
-    temp_string = cv2.imencode(image_format, image_array)[1].tobytes()
+    :param image_array: numpy array image object
+    :param image_format: converted image format,default = '.png', it could also be '.jpg','.jpeg','.bmp'
+    :return: base64string
+    """
+    temp_string = image_array_to_bytes(image_array, image_format)
     base64_string = base64.b64encode(temp_string).decode('utf-8')
     return base64_string
 
@@ -72,16 +84,17 @@ def base64_string_to_image_array(base64_string: str):
     return image_array
 
 
-def rotate_image(img, degree: int):
+def rotate_image(image_array, degree: int):
     """
     rotate a cv image and return its rotation matrix
-    @param img: cv image object
-    @param degree: rotate degree, if its negative, do counterclockwise rotation
+
+    :param image_array: image array object
+    :param degree: rotate degree, if its negative, do counterclockwise rotation
     """
     import cv2
     from math import fabs, sin, radians, cos
 
-    height, width = img.shape[:2]
+    height, width = image_array.shape[:2]
     new_height = int(width * fabs(sin(radians(degree))) + height * fabs(cos(radians(degree))))
     new_width = int(height * fabs(sin(radians(degree))) + width * fabs(cos(radians(degree))))
     rotation_matrix = cv2.getRotationMatrix2D((width // 2, height // 2), degree, 1)
@@ -89,5 +102,5 @@ def rotate_image(img, degree: int):
     rotation_matrix[0, 2] += (new_width - width) // 2
     rotation_matrix[1, 2] += (new_height - height) // 2
 
-    rotated_img = cv2.warpAffine(img, rotation_matrix, (new_width, new_height), borderValue=(255, 255, 255))
+    rotated_img = cv2.warpAffine(image_array, rotation_matrix, (new_width, new_height), borderValue=(255, 255, 255))
     return rotated_img, rotation_matrix

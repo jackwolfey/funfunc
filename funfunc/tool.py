@@ -4,12 +4,14 @@
 # FILE    : tool
 # PROJECT : funfunc
 # IDE     : PyCharm
+import copy
 import datetime
 import functools
 import json
 import logging
 import os
 import time
+import typing
 import warnings
 
 
@@ -125,6 +127,7 @@ def set_deprecated(warn_msg=None):
     """set a function into deprecated state"""
 
     def outer(deprecated_func):
+        @functools.wraps(deprecated_func)
         def inner(*args, **kwargs):
             if warn_msg and isinstance(warn_msg, str):
                 warnings.warn(warn_msg, DeprecationWarning, 2)
@@ -145,6 +148,7 @@ def indented_json_string(json_string):
 class MagicDict(dict):
     """
     let you access python dict object by using attr
+
     Example:
         from funfunc import MagicDict
 
@@ -156,49 +160,167 @@ class MagicDict(dict):
         # Beijing
     """
 
-    # inherit from built-in class dict to automatically implement all dict original method
-    def __init__(self, d=None, **kwargs):  # noqa
-        if d is None:
-            # empty init
-            d = {}
-        if kwargs:
-            # support for update feature
-            d.update(**kwargs)
-        for k, v in d.items():
-            # set class attribute
-            setattr(self, k, v)
+    def __init__(__self, *args, **kwargs):  # noqa
+        object.__setattr__(__self, '__parent', kwargs.pop('__parent', None))
+        object.__setattr__(__self, '__key', kwargs.pop('__key', None))
+        object.__setattr__(__self, '__frozen', False)
+        for arg in args:
+            if not arg:
+                continue
+            elif isinstance(arg, dict):
+                for key, val in arg.items():
+                    __self[key] = __self._hook(val)
+            elif isinstance(arg, tuple) and (not isinstance(arg[0], tuple)):
+                __self[arg[0]] = __self._hook(arg[1])
+            else:
+                for key, val in iter(arg):
+                    __self[key] = __self._hook(val)
 
-        for k in self.__class__.__dict__.keys():
-            # ignore any magic method and useful method
-            if not (k.startswith('__') and k.endswith('__')) and k not in ('update', 'pop'):
-                setattr(self, k, getattr(self, k))
+        for key, val in kwargs.items():
+            __self[key] = __self._hook(val)
 
     def __setattr__(self, name, value):
-        if isinstance(value, (list, tuple)):
-            value = [self.__class__(x)
-                     if isinstance(x, dict) else x for x in value]
-        elif isinstance(value, dict) and not isinstance(value, self.__class__):
-            value = self.__class__(value)
-        super(MagicDict, self).__setattr__(name, value)
+        if hasattr(self.__class__, name):
+            raise AttributeError("'Dict' object attribute "
+                                 "'{0}' is read-only".format(name))
+        else:
+            self[name] = value
+
+    def __setitem__(self, name, value):
+        isFrozen = (hasattr(self, '__frozen') and
+                    object.__getattribute__(self, '__frozen'))
+        if isFrozen and name not in super(MagicDict, self).keys():
+            raise KeyError(name)
         super(MagicDict, self).__setitem__(name, value)
+        try:
+            p = object.__getattribute__(self, '__parent')
+            key = object.__getattribute__(self, '__key')
+        except AttributeError:
+            p = None
+            key = None
+        if p is not None:
+            p[key] = self
+            object.__delattr__(self, '__parent')
+            object.__delattr__(self, '__key')
 
-    __setitem__ = __setattr__
+    def __add__(self, other):
+        if not self.keys():
+            return other
+        else:
+            self_type = type(self).__name__
+            other_type = type(other).__name__
+            msg = "unsupported operand type(s) for +: '{}' and '{}'"
+            raise TypeError(msg.format(self_type, other_type))
 
-    def update(self, e=None, **things):
-        d = e or dict()
-        d.update(things)
-        for k in d:
-            setattr(self, k, d[k])
+    @classmethod
+    def _hook(cls, item):
+        if isinstance(item, dict):
+            return cls(item)
+        elif isinstance(item, (list, tuple)):
+            return type(item)(cls._hook(elem) for elem in item)
+        return item
 
-    def pop(self, k, d=None):
-        delattr(self, k)
-        return super(MagicDict, self).pop(k, d)
+    def __getattr__(self, item):
+        return self.__getitem__(item)
+
+    def __missing__(self, name):
+        if object.__getattribute__(self, '__frozen'):
+            raise KeyError(name)
+        return self.__class__(__parent=self, __key=name)
+
+    def __delattr__(self, name):
+        del self[name]
+
+    def to_dict(self):
+        base = {}
+        for key, value in self.items():
+            if isinstance(value, type(self)):
+                base[key] = value.to_dict()
+            elif isinstance(value, (list, tuple)):
+                base[key] = type(value)(
+                    item.to_dict() if isinstance(item, type(self)) else
+                    item for item in value)
+            else:
+                base[key] = value
+        return base
+
+    def copy(self):
+        return copy.copy(self)
+
+    def deepcopy(self):
+        return copy.deepcopy(self)
+
+    def __deepcopy__(self, memo):
+        other = self.__class__()
+        memo[id(self)] = other
+        for key, value in self.items():
+            other[copy.deepcopy(key, memo)] = copy.deepcopy(value, memo)
+        return other
+
+    def update(self, *args, **kwargs):
+        other = {}
+        if args:
+            if len(args) > 1:
+                raise TypeError()
+            other.update(args[0])
+        other.update(kwargs)
+        for k, v in other.items():
+            if ((k not in self) or
+                    (not isinstance(self[k], dict)) or
+                    (not isinstance(v, dict))):
+                self[k] = v
+            else:
+                self[k].update(v)
+
+    def __getnewargs__(self):
+        return tuple(self.items())
+
+    def __getstate__(self):
+        return self
+
+    def __setstate__(self, state):
+        self.update(state)
+
+    def __or__(self, other):
+        if not isinstance(other, (MagicDict, dict)):
+            return NotImplemented
+        new = MagicDict(self)
+        new.update(other)
+        return new
+
+    def __ror__(self, other):
+        if not isinstance(other, (MagicDict, dict)):
+            return NotImplemented
+        new = MagicDict(other)
+        new.update(self)
+        return new
+
+    def __ior__(self, other):
+        self.update(other)
+        return self
+
+    def setdefault(self, key, default=None):
+        if key in self:
+            return self[key]
+        else:
+            self[key] = default
+            return default
+
+    def freeze(self, shouldFreeze=True):
+        object.__setattr__(self, '__frozen', shouldFreeze)
+        for key, val in self.items():
+            if isinstance(val, MagicDict):
+                val.freeze(shouldFreeze)
+
+    def unfreeze(self):
+        self.freeze(False)
 
 
 class OptClass:
     """
     let you create a Option class by a list of option names of predefined options dict
     .json class property can convert options to json format string
+
     Example:
         # init by list of option names
         opt_names = ['use_gpu', 'workers', 'batch_size']
@@ -239,9 +361,10 @@ class OptClass:
 def get_all_abspath_from_folder(folder_path: str, get_relative: bool = False, file_only: bool = True) -> list:
     """
     get all files path of a path or a folder, if file_only=False, include folder
-    @param folder_path: target folder_path, a path-like string
-    @param get_relative: if True, will return relative path instead of abspath
-    @param file_only: if False, will return folder's path in folder_path
+
+    :param folder_path: target folder_path, a path-like string
+    :param get_relative: if True, will return relative path instead of abspath
+    :param file_only: if False, will return folder's path in folder_path
     """
     if not get_relative:
         folder_path = os.path.abspath(folder_path)
@@ -271,6 +394,7 @@ def try_except_print(func):
     auto add try except to a function, use @try_except_print decorator
     """
 
+    @functools.wraps(func)
     def handler(*args, **kwargs):
         try:
             func(*args, **kwargs)
@@ -278,3 +402,28 @@ def try_except_print(func):
             print(f'Exception From {func.__name__}: {e}')
 
     return handler
+
+
+def retry(retry_count: int = 5, sleep_time: int = 1):
+    """
+    retry to call a function when it raise an error
+    """
+
+    def wrapper(func):
+        @functools.wraps(func)
+        def inner(*args, **kwargs):
+            for i in range(retry_count):
+                try:
+                    res = func(*args, **kwargs)
+                    return res
+                except:
+                    time.sleep(sleep_time)
+                    continue
+            return None
+
+        return inner
+
+    return wrapper
+
+
+Flexible = typing.Any  # use this to mark something could be modified

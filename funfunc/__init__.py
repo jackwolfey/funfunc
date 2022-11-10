@@ -4,7 +4,7 @@
 # FILE    : __init__
 # PROJECT : funfunc
 # IDE     : PyCharm
-__VERSION__ = "0.2.0"
+__VERSION__ = "0.2.1"
 __AUTHOR__ = "Wei Jia"
 __DESCRIPTION__ = "Make Py Development Much Easier & Fun"
 __all__ = [
@@ -38,7 +38,10 @@ __all__ = [
     'is_in_docker',
     'get_methods',
     'get_args_info',
-    'try_except_print'
+    'try_except_print',
+    'retry',
+    'Flexible',
+    'image_array_to_bytes'
 ]
 
 from .cv import *

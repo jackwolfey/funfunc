@@ -17,10 +17,12 @@ def pandas_max_print() -> None:
 
 def train_test_split_arr(arr: list, ratio: float, shuffle=False) -> Tuple[List, List]:
     """
-    @param arr: target list ready to split
-    @param ratio: the train set ratio
-    @param shuffle: shuffle arr
-    @return: Tuple(train_set, test_set)
+    split a list-like array to two parts
+
+    :param arr: target list ready to split
+    :param ratio: the train set ratio
+    :param shuffle: shuffle arr
+    :return: Tuple(train_set, test_set)
     """
     if shuffle:
         random.shuffle(arr)
