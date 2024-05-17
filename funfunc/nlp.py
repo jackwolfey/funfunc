@@ -4,6 +4,8 @@
 # FILE    : nlp
 # PROJECT : funfunc
 # IDE     : PyCharm
+__all__ = ['Validator', 'replace_chinese', 'make_valid_filename']
+
 import re
 
 
@@ -33,3 +35,11 @@ def replace_chinese(text, replace_str: str = ' ') -> str:
     filtrate = re.compile(u'[\u4E00-\u9FA5]')
     text_without_chinese = filtrate.sub(rf'{replace_str}', text)
     return text_without_chinese
+
+
+def make_valid_filename(filename, replaced_char='_') -> str:
+    """
+    make an invalid filename become valid
+    """
+    invalid_filename_chars = r'[<>:"/\\|?*\x00-\x1F]'
+    return re.sub(invalid_filename_chars, replaced_char, filename)

@@ -4,6 +4,30 @@
 # FILE    : tool
 # PROJECT : funfunc
 # IDE     : PyCharm
+__all__ = [
+    'get_current_str_time',
+    'download_file',
+    'time_it',
+    'time_it_precise',
+    'quick_sort',
+    'get_basic_logger',
+    'chunks',
+    'get_host_ip',
+    'time_to_timestamp',
+    'second_to_strtime',
+    'set_deprecated',
+    'indented_json_string',
+    'MagicDict',
+    'OptClass',
+    'get_all_abspath_from_folder',
+    'is_in_docker',
+    'get_methods',
+    'get_args_info',
+    'try_except_print',
+    'retry',
+    'Flexible'
+]
+
 import copy
 import datetime
 import functools
@@ -406,7 +430,7 @@ def try_except_print(func):
 
 def retry(retry_count: int = 5, sleep_time: int = 1):
     """
-    retry to call a function when it raise an error
+    retry to call a function when it raises an error
     """
 
     def wrapper(func):
@@ -426,4 +450,4 @@ def retry(retry_count: int = 5, sleep_time: int = 1):
     return wrapper
 
 
-Flexible = typing.Any  # use this to mark something could be modified
+Flexible = typing.Any  # use this to mark something that could be modified

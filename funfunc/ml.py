@@ -4,6 +4,8 @@
 # FILE    : ml
 # PROJECT : funfunc
 # IDE     : PyCharm
+__all__ = ['pandas_max_print', 'train_test_split_arr']
+
 import random
 from typing import Tuple, List
 

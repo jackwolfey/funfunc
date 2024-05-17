@@ -4,6 +4,8 @@
 # FILE    : dl
 # PROJECT : funfunc
 # IDE     : PyCharm
+__all__ = ['get_device_torch']
+
 
 def get_device_torch():
     import torch

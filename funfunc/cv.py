@@ -4,8 +4,32 @@
 # FILE    : cv
 # PROJECT : funfunc
 # IDE     : PyCharm
+__all__ = [
+    'pil_image_to_bytes',
+    'pil_image_to_base64_string',
+    'base64_string_to_pil_image',
+    'pil_image_to_image_array',
+    'image_array_to_pil_image',
+    'image_array_to_bytes',
+    'image_array_to_base64_string',
+    'base64_string_to_image_array',
+    'rotate_image',
+    'bytes_to_pil_image',
+    'bytes_to_image_array',
+    'image_url_to_pil_image'
+]
+
 import base64
 import io
+
+
+def pil_image_to_bytes(pil_image) -> bytes:
+    try:
+        image_io = io.BytesIO()
+        pil_image.save(image_io, format='PNG')
+    except AttributeError as e:
+        raise NotImplementedError(f'pil_image has not method save(), is this a PIL.Image.Image? {e}')
+    return image_io.getvalue()
 
 
 def pil_image_to_base64_string(pil_image) -> str:
@@ -15,14 +39,7 @@ def pil_image_to_base64_string(pil_image) -> str:
     :param pil_image: PIL.Image object
     :return: base64string
     """
-    temp_buffer = io.BytesIO()
-    try:
-        pil_image.save(temp_buffer, format('png'))
-    except Exception as e:
-        raise NotImplementedError(f'pil_image has not method save(), is this a PIL.Image.Image? {e}')
-    byte_data = temp_buffer.getvalue()
-    base64_string = base64.b64encode(byte_data).decode('utf-8')
-    return base64_string
+    return base64.b64encode(pil_image_to_bytes(pil_image)).decode('utf-8')
 
 
 def base64_string_to_pil_image(image_base64_string: str):
@@ -89,7 +106,7 @@ def rotate_image(image_array, degree: int):
     rotate a cv image and return its rotation matrix
 
     :param image_array: image array object
-    :param degree: rotate degree, if its negative, do counterclockwise rotation
+    :param degree: rotate degree, if it's negative, do counterclockwise rotation
     """
     import cv2
     from math import fabs, sin, radians, cos
@@ -104,3 +121,32 @@ def rotate_image(image_array, degree: int):
 
     rotated_img = cv2.warpAffine(image_array, rotation_matrix, (new_width, new_height), borderValue=(255, 255, 255))
     return rotated_img, rotation_matrix
+
+
+def bytes_to_pil_image(image_bytes: bytes):
+    from io import BytesIO
+    from PIL import Image
+
+    return Image.open(BytesIO(image_bytes))
+
+
+def bytes_to_image_array(image_bytes: bytes):
+    import numpy as np
+    import cv2
+
+    image_array = np.array(bytes_to_pil_image(image_bytes))
+    return cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
+
+
+def image_url_to_pil_image(image_url: str, check_headers: bool = False):
+    from io import BytesIO
+    import requests
+    from PIL import Image
+
+    request = requests.get(image_url)
+    if check_headers:
+        content_type = request.headers.get('Content-Type', '')
+        assert content_type.split(r'/')[0] == 'image', \
+            "The request file's Content-Type is not image, please check the URL."
+
+    return Image.open(BytesIO(request.content))

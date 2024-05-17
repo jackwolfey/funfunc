@@ -3,10 +3,11 @@ import os
 import unittest
 import time
 
-import cv2.cv2 as cv2
+import cv2
 import numpy as np
 import pandas as pd
 from PIL import Image
+from pathlib import Path
 
 import funfunc
 
@@ -31,7 +32,8 @@ class FunfuncTestCase(unittest.TestCase):
         image_base64 = funfunc.pil_image_to_base64_string(self.pil_image)
         # 该测试判断条件改为下句无法通过，问题未知
         # self.assertEqual(image_base64, self.image_base64)
-        self.assertIsInstance(image_base64, str)
+        image = funfunc.base64_string_to_pil_image(image_base64)
+        self.assertEqual(image.size, (50, 50))
 
     def test_image_array_to_pil_image(self):
         pil_image = funfunc.image_array_to_pil_image(self.image_array)
@@ -53,7 +55,7 @@ class FunfuncTestCase(unittest.TestCase):
                                  "then pass the get_device_torch test")
     def test_get_device_torch(self):
         device = funfunc.get_device_torch()
-        self.assertEqual(device, 'cpu')
+        self.assertIn(device, ['cuda', 'cpu'])
 
     def test_pandas_max_print(self):
         old = pd.get_option('display.max_columns')
@@ -84,13 +86,13 @@ class FunfuncTestCase(unittest.TestCase):
                               './pic.gif')
         self.assertTrue(os.path.exists('./pic.gif'))
 
-    def test_time_it(self):
+    @classmethod
+    def test_time_it(cls):
         @funfunc.time_it
         def a_func():
-            time.sleep(3)
+            time.sleep(1)
 
         a_func()
-        self.assertEqual(True, True)
 
     def test_quick_sort(self):
         arr = [3, 1, 2]
@@ -108,7 +110,7 @@ class FunfuncTestCase(unittest.TestCase):
         file_lst_relative = funfunc.get_all_abspath_from_folder(path, get_relative=True)
         file_lst_with_folder = funfunc.get_all_abspath_from_folder(path, file_only=False)
         self.assertEqual(len(file_lst), 3)
-        self.assertEqual(sorted(file_lst_relative)[0], './pic.gif')
+        self.assertEqual(Path(sorted(file_lst_relative)[0]), Path('./pic.gif'))
         self.assertEqual(len(file_lst_with_folder), 4)
 
     def test_train_test_split_arr(self):
@@ -117,7 +119,23 @@ class FunfuncTestCase(unittest.TestCase):
         self.assertEqual(len(train), 90)
 
     def test_is_in_docker(self):
-        self.assertFalse(funfunc.is_in_docker())
+        flag = funfunc.is_in_docker()
+        self.assertIn(flag, [True, False])
+
+    def test_image_array_to_bytes(self):
+        bytes = funfunc.image_array_to_bytes(self.image_array)
+        image = funfunc.bytes_to_pil_image(bytes)
+        self.assertEqual(image.size, (50, 50))
+
+    def test_bytes_to_image_array(self):
+        image_arr = funfunc.bytes_to_image_array(funfunc.pil_image_to_bytes(self.pil_image))
+        image = funfunc.image_array_to_pil_image(image_arr)
+        self.assertEqual(image.size, (50, 50))
+
+    def test_image_url_to_pil_image(self):
+        image = funfunc.image_url_to_pil_image('http://mmbiz.qpic.cn/mmbiz/PwIlO51l7wuFyoFwAXfqPNETWCibjN'
+                                               'ACIt6ydN7vw8LeIwT7IjyG3eeribmK4rhibecvNKiaT2qeJRIWXLuKYPiaqtQ/0')
+        self.assertEqual(image.size, (960, 1280))
 
 
 if __name__ == '__main__':

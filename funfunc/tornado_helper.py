@@ -4,6 +4,8 @@
 # FILE    : tornado
 # PROJECT : funfunc
 # IDE     : PyCharm
+__all__ = ['BaseTornadoWebHandler']
+
 import tornado.web
 
 
