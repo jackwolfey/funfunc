@@ -1,13 +1,15 @@
 import base64
 import os
-import unittest
+import subprocess
 import time
+import unittest
+from pathlib import Path
+import warnings
 
 import cv2
 import numpy as np
 import pandas as pd
 from PIL import Image
-from pathlib import Path
 
 import funfunc
 
@@ -136,6 +138,23 @@ class FunfuncTestCase(unittest.TestCase):
         image = funfunc.image_url_to_pil_image('http://mmbiz.qpic.cn/mmbiz/PwIlO51l7wuFyoFwAXfqPNETWCibjN'
                                                'ACIt6ydN7vw8LeIwT7IjyG3eeribmK4rhibecvNKiaT2qeJRIWXLuKYPiaqtQ/0')
         self.assertEqual(image.size, (960, 1280))
+
+    @classmethod
+    def test_version_number(cls):
+        output = subprocess.check_output(['git', 'describe', '--tags', '--abbrev=0'], stderr=subprocess.STDOUT)
+        current_version = output.decode('utf-8').strip()[1:]
+        new_version = funfunc.__VERSION__
+        if current_version == new_version:
+            warnings.warn('You may change some code but not modified the __VERSION__ in the __init__.py, please '
+                          'remember to modify it.')
+
+    def test_split_list(self):
+        lst = [1, 2, 3, 4, 5, 6, 7]
+        result = funfunc.split_list(lst, 3)
+        self.assertEqual(result, [[1, 2, 3], [4, 5], [6, 7]])
+
+    def test_tround(self):
+        self.assertEqual(funfunc.tround(2.5), 3)
 
 
 if __name__ == '__main__':

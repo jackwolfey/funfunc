@@ -16,11 +16,13 @@ __all__ = [
     'rotate_image',
     'bytes_to_pil_image',
     'bytes_to_image_array',
-    'image_url_to_pil_image'
+    'image_url_to_pil_image',
+    'gen_ico_from_png'
 ]
 
 import base64
 import io
+from pathlib import Path
 
 
 def pil_image_to_bytes(pil_image) -> bytes:
@@ -150,3 +152,14 @@ def image_url_to_pil_image(image_url: str, check_headers: bool = False):
             "The request file's Content-Type is not image, please check the URL."
 
     return Image.open(BytesIO(request.content))
+
+
+def gen_ico_from_png(png_file_path: str, output_path: str = None):
+    from PIL import Image
+
+    png_path = Path(png_file_path)
+    img = Image.open(png_path)
+    if output_path is None:
+        img.save(png_path.parent.joinpath(png_path.stem + '.ico'), format='ICO', sizes=[img.size])
+    else:
+        img.save(output_path, format='ICO', sizes=[img.size])

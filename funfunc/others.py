@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 # AUTHOR  : wjia
 # TIME    : 2022/6/21 17:38
-# FILE    : tornado
+# FILE    : others
 # PROJECT : funfunc
 # IDE     : PyCharm
-__all__ = ['BaseTornadoWebHandler']
+try:
+    from tornado.web import RequestHandler
+except ImportError:
+    pass
 
-import tornado.web
 
-
-class BaseTornadoWebHandler(tornado.web.RequestHandler):
+class BaseTornadoWebHandler(RequestHandler):
     def data_received(self, chunk):
         pass
 
@@ -21,3 +22,9 @@ class BaseTornadoWebHandler(tornado.web.RequestHandler):
 
     def options(self):
         pass
+
+
+def pywebio_set_footer(content):
+    from pywebio.session import run_js
+
+    run_js(f'$(".footer").text("{content}")')

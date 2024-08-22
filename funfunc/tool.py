@@ -25,7 +25,9 @@ __all__ = [
     'get_args_info',
     'try_except_print',
     'retry',
-    'Flexible'
+    'Flexible',
+    'split_list',
+    'tround'
 ]
 
 import copy
@@ -448,6 +450,36 @@ def retry(retry_count: int = 5, sleep_time: int = 1):
         return inner
 
     return wrapper
+
+
+def split_list(lst: list, n: int) -> list[list]:
+    """split a list into n chunks with an average of items number"""
+    if n <= 0:
+        raise ValueError("The number of splits must be greater than 0")
+    if n > len(lst):
+        raise ValueError("The number of splits must be less than or equal to the length of the list")
+
+    sublist_len = len(lst) // n
+    remainder = len(lst) % n
+
+    sublists = []
+    start = 0
+    for i in range(n):
+        end = start + sublist_len + (1 if i < remainder else 0)
+        sublists.append(lst[start:end])
+        start = end
+
+    return sublists
+
+
+def tround(n):
+    """traditional rounding, round half away from zero, not round half to even"""
+    if n > 0:
+        return int(n + 0.5)
+    elif n < 0:
+        return int(n - 0.5)
+    else:
+        return 0
 
 
 Flexible = typing.Any  # use this to mark something that could be modified
