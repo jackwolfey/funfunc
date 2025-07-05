@@ -452,7 +452,7 @@ def retry(retry_count: int = 5, sleep_time: int = 1):
     return wrapper
 
 
-def split_list(lst: list, n: int) -> list[list]:
+def split_list(lst: list, n: int):
     """split a list into n chunks with an average of items number"""
     if n <= 0:
         raise ValueError("The number of splits must be greater than 0")
